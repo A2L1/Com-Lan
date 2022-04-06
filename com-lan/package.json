@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^3.11.1",
     "formik": "^2.2.9",
     "net": "^1.0.2",
     "network": "^0.6.1",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "eslint": "8.11.0",
-    "eslint-config-next": "12.1.0"
+    "eslint-config-next": "12.1.0",
+    "prisma": "^3.11.1"
   }
 }
