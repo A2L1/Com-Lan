@@ -1,5 +1,6 @@
 import network from "network";
 import { PrismaClient } from "@prisma/client";
+const findDevices = require("local-devices");
 
 const IpToBinString = (ip) => {
   //Crée une liste des octets de l'adresse entrée
@@ -24,7 +25,7 @@ const getPrivateIp = async () =>
     })
   );
 
-const getBroadcast = async (ip) =>
+const getCIDR = async () =>
   new Promise((resolve, reject) =>
     network.get_active_interface((err, interfaceObj) => {
       if (err) {
@@ -35,6 +36,7 @@ const getBroadcast = async (ip) =>
       const stringMask = IpToBinString(interfaceObj["netmask"]);
       //Récupère l'indice du premier zero dans la string binaire du masque
       const firstZero = stringMask.indexOf("0");
+      /*
       //Récupère l'ip de l'interface en une seule string des valeurs binaires
       const ipStringBin = IpToBinString(ip);
       //Garde la partie réseau de l'ip de l'interface
@@ -52,7 +54,8 @@ const getBroadcast = async (ip) =>
       resolve({
         broadcast: broadcast.join("."),
         mask: interfaceObj["netmask"],
-      });
+      });*/
+      resolve(firstZero);
     })
   );
 const getToBDD = async (obj) => {
@@ -78,12 +81,19 @@ export default async (req, res) => {
     case "GET": {
       try {
         const ipa = await getPrivateIp();
-        const broadcast = await getBroadcast(ipa);
+        //const broadcast = await getBroadcastAddress(ipa);
+
+        const devices = await findDevices(ipa + "/" + (await getCIDR())).then(
+          (devices) => {
+            return devices;
+          }
+        );
+
+        console.log(devices);
         //getToBDD();
         res.status(200).send({
           text: "requete GET",
           interface: ipa,
-          broadcast: broadcast,
         });
       } catch (error) {
         res.status(400).json({});
