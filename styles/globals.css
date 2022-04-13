@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#__next {
+  @apply min-h-full
+}
+
+@layer utilities {
+  /* here goes your custom utilities */
+  .bg-primary {
+    @apply .bg-blue-600
+  }
+}

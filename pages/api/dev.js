@@ -1,41 +1,41 @@
-import network from "network";
-import { PrismaClient } from "@prisma/client";
-const findDevices = require("local-devices");
+import { PrismaClient } from "@prisma/client"
+import network from "network"
+const findDevices = require("local-devices")
 
 const IpToBinString = (ip) => {
   //Crée une liste des octets de l'adresse entrée
-  let arrayNetmask = ip.split(".");
+  let arrayNetmask = ip.split(".")
   //Convertit chaque octet en valeur binaire
   for (let i = 0; i <= arrayNetmask.length - 1; i++) {
-    const number = arrayNetmask[i];
-    const bin = parseInt(number).toString(2).padStart(8, "0");
-    arrayNetmask[i] = bin;
+    const number = arrayNetmask[i]
+    const bin = parseInt(number).toString(2).padStart(8, "0")
+    arrayNetmask[i] = bin
   }
 
-  return arrayNetmask.join("");
-};
+  return arrayNetmask.join("")
+}
 const getPrivateIp = async () =>
   new Promise((resolve, reject) =>
     network.get_private_ip((err, ip) => {
       if (err) {
-        reject(err);
-        return;
+        reject(err)
+        return
       }
-      resolve(ip);
+      resolve(ip)
     })
-  );
+  )
 
 const getCIDR = async () =>
   new Promise((resolve, reject) =>
     network.get_active_interface((err, interfaceObj) => {
       if (err) {
-        reject(err);
-        return;
+        reject(err)
+        return
       }
       //Récupération du masque réseau en une seule string des valeurs binaires
-      const stringMask = IpToBinString(interfaceObj["netmask"]);
+      const stringMask = IpToBinString(interfaceObj["netmask"])
       //Récupère l'indice du premier zero dans la string binaire du masque
-      const firstZero = stringMask.indexOf("0");
+      const firstZero = stringMask.indexOf("0")
       /*
       //Récupère l'ip de l'interface en une seule string des valeurs binaires
       const ipStringBin = IpToBinString(ip);
@@ -55,11 +55,12 @@ const getCIDR = async () =>
         broadcast: broadcast.join("."),
         mask: interfaceObj["netmask"],
       });*/
-      resolve(firstZero);
+      resolve(firstZero)
     })
-  );
-const getToBDD = async (obj) => {
-  const prisma = new PrismaClient();
+  )
+
+const getDB = async () => {
+  const prisma = new PrismaClient()
   const device = await prisma.device
     .create({
       data: {
@@ -68,45 +69,52 @@ const getToBDD = async (obj) => {
       },
     })
     .catch((e) => {
-      throw e;
+      throw e
     })
     .finally(async () => {
-      await prisma.$disconnect();
-    });
-};
+      await prisma.$disconnect()
+    })
+}
 
-export default async (req, res) => {
-  const { method } = req;
+const handler = async (req, res) => {
+  const { method } = req
+
   switch (method) {
     case "GET": {
       try {
-        const ipa = await getPrivateIp();
+        const ipa = await getPrivateIp()
         //const broadcast = await getBroadcastAddress(ipa);
 
-        const devices = await findDevices(ipa + "/" + (await getCIDR())).then(
+        const devices = await findDevices(`${ipa}/${await getCIDR()}`).then(
           (devices) => {
-            return devices;
+            return devices
           }
-        );
+        )
 
-        console.log(devices);
-        //getToBDD();
+        console.log(devices)
+        //getDB();
         res.status(200).send({
           text: "requete GET",
           interface: ipa,
-        });
+        })
       } catch (error) {
-        res.status(400).json({});
+        res.status(400).json({})
       }
-      break;
+
+      break
     }
+
     case "POST": {
       try {
-        const data_user = await userSchema.create(req.body);
-        res.status(200).json({ data: data_user });
+        const data_user = await userSchema.create(req.body)
+        res.status(200).json({ data: data_user })
       } catch (error) {
-        res.status(400).json({});
+        res.status(400).json({})
       }
+
+      break
     }
   }
-};
+}
+
+export default handler
