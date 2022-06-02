@@ -1,6 +1,7 @@
-import { PrismaClient } from "@prisma/client"
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
+import { Prisma, PrismaClient } from "@prisma/client"
 import network from "network"
-const findDevices = require("local-devices")
 
 const IpToBinString = (ip) => {
   //Crée une liste des octets de l'adresse entrée
@@ -19,8 +20,10 @@ const getPrivateIp = async () =>
     network.get_private_ip((err, ip) => {
       if (err) {
         reject(err)
+
         return
       }
+
       resolve(ip)
     })
   )
@@ -30,8 +33,10 @@ const getCIDR = async () =>
     network.get_active_interface((err, interfaceObj) => {
       if (err) {
         reject(err)
+
         return
       }
+
       //Récupération du masque réseau en une seule string des valeurs binaires
       const stringMask = IpToBinString(interfaceObj["netmask"])
       //Récupère l'indice du premier zero dans la string binaire du masque
@@ -84,14 +89,15 @@ const handler = async (req, res) => {
       try {
         const ipa = await getPrivateIp()
         //const broadcast = await getBroadcastAddress(ipa);
-
+        /*
         const devices = await findDevices(`${ipa}/${await getCIDR()}`).then(
           (devices) => {
             return devices
           }
         )
-
         console.log(devices)
+        */
+
         //getDB();
         res.status(200).send({
           text: "requete GET",
@@ -106,7 +112,7 @@ const handler = async (req, res) => {
 
     case "POST": {
       try {
-        const data_user = await userSchema.create(req.body)
+        const data_user = await Prisma.client.create(req.body)
         res.status(200).json({ data: data_user })
       } catch (error) {
         res.status(400).json({})

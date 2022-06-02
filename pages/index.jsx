@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Button from "@/components/Button"
 import Form from "@/components/Form"
 import FormField from "@/components/FormField"
@@ -11,7 +12,7 @@ const initialValues = {
 
 const IndexPage = () => {
   const handleFormSubmit = async (values) => {
-    console.log(values)
+		console.log(values)
   }
 
   return (
