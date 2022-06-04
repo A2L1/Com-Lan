@@ -4,6 +4,7 @@ import Form from "@/components/Form"
 import FormField from "@/components/FormField"
 import Page from "@/components/Page"
 import { Formik } from "formik"
+import axios from "axios"
 
 const initialValues = {
   username: "",
@@ -12,7 +13,9 @@ const initialValues = {
 
 const IndexPage = () => {
   const handleFormSubmit = async (values) => {
-		console.log(values)
+    console.log(values)
+    const data = { username: values.username, password: values.password }
+    await axios.post("http://localhost:3000/api/device", data).then((response)=>(console.log(response)))
   }
 
   return (
@@ -21,6 +24,7 @@ const IndexPage = () => {
         {({ isSubmitting, isValid }) => (
           <Form>
             <FormField name="username" placeholder="Username" />
+            <FormField name="password" placeholder="Password" />
             <p>
               <Button type="submit" disabled={isSubmitting || !isValid}>
                 Submit

@@ -88,6 +88,7 @@ const handler = async (req, res) => {
     case "GET": {
       try {
         const ipa = await getPrivateIp()
+
         //const broadcast = await getBroadcastAddress(ipa);
         /*
         const devices = await findDevices(`${ipa}/${await getCIDR()}`).then(
@@ -112,13 +113,73 @@ const handler = async (req, res) => {
 
     case "POST": {
       try {
-        const data_user = await Prisma.client.create(req.body)
-        res.status(200).json({ data: data_user })
+        const prisma = new PrismaClient()
+        const ipa = await getPrivateIp()
+        await prisma.device
+          .create({ data: { address: ipa, username: req.body.username } })
+          .catch((e) => {
+            throw e
+          })
+          .finally(async () => {
+            await prisma.$disconnect()
+          })
+        res.status(200).json({})
       } catch (error) {
-        res.status(400).json({})
+        res.status(400).json({ data: error })
       }
 
       break
+    }
+
+    case "PUT": {
+      try {
+        const prisma = new PrismaClient()
+        const ipa = await getPrivateIp()
+        console.log(req.body.username)
+        await prisma.device
+          .update({
+            where: {
+              username: req.body.username_base,
+            },
+            data: { address: ipa, username: req.body.username },
+          })
+          .catch((e) => {
+            throw e
+          })
+          .finally(async () => {
+            await prisma.$disconnect()
+          })
+        res.status(200).json({})
+      } catch (error) {
+        res.status(400).json({ error: error, msg: "Erreur dans la requête" })
+      }
+
+      break
+    }
+
+    //await prisma.device.deleteMany({}) - Clear Database
+    case "DELETE": {
+      try {
+        const prisma = new PrismaClient()
+        const ipa = await getPrivateIp()
+        await prisma.device
+          .delete({
+            where: {
+              username: req.body.username,
+              address: ipa,
+            },
+          })
+          .catch((e) => {
+            throw e
+          })
+          .finally(async () => {
+            await prisma.$disconnect()
+          })
+        res.status(200).json({})
+      } catch (error) {
+        console.log(error)
+        res.status(400).json({ data: error })
+      }
     }
   }
 }

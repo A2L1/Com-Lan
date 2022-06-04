@@ -13,7 +13,7 @@ datasource db {
 model Device {
   createdAt DateTime @default(now())
   address   String   @unique
-  username  String?
+  username  String?  @unique
 }
 
 model ARange {
